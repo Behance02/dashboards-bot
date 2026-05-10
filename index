@@ -1,0 +1,31 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Configuración de Bienvenida</title>
+    <style>
+        body { font-family: 'Segoe UI', sans-serif; background: #1a1a2e; color: white; text-align: center; }
+        .container { margin-top: 50px; background: #16213e; padding: 20px; border-radius: 15px; display: inline-block; }
+        input, textarea { width: 90%; padding: 10px; margin: 10px 0; border-radius: 5px; border: none; }
+        button { background: #0f3460; color: white; padding: 10px 20px; border: none; border-radius: 5px; cursor: pointer; }
+        button:hover { background: #e94560; }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>Panel de Bienvenida</h1>
+        <p>Configura el mensaje de tu bot</p>
+        <input type="text" id="canal" placeholder="ID del Canal de Bienvenida">
+        <textarea id="mensaje" placeholder="Ej: ¡Bienvenido {user} al servidor!"></textarea>
+        <br>
+        <button onclick="guardar()">Guardar Configuración</button>
+    </div>
+
+    <script>
+        function guardar() {
+            alert("¡Configuración enviada! (Aquí conectaremos con tu bot luego)");
+        }
+    </script>
+</body>
+</html>

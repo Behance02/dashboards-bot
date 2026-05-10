@@ -1,31 +1,1107 @@
 <!DOCTYPE html>
 <html lang="es">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Configuración de Bienvenida</title>
-    <style>
-        body { font-family: 'Segoe UI', sans-serif; background: #1a1a2e; color: white; text-align: center; }
-        .container { margin-top: 50px; background: #16213e; padding: 20px; border-radius: 15px; display: inline-block; }
-        input, textarea { width: 90%; padding: 10px; margin: 10px 0; border-radius: 5px; border: none; }
-        button { background: #0f3460; color: white; padding: 10px 20px; border: none; border-radius: 5px; cursor: pointer; }
-        button:hover { background: #e94560; }
-    </style>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Zora Bot — Dashboard</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link href="https://fonts.googleapis.com/css2?family=Syne:wght@400;600;700;800&family=DM+Sans:wght@300;400;500&display=swap" rel="stylesheet" />
+  <style>
+    /* ─── Variables ─── */
+    :root {
+      --bg:        #0a0b10;
+      --surface:   #111218;
+      --card:      #16181f;
+      --border:    #22252f;
+      --accent:    #5865F2;
+      --accent2:   #eb459e;
+      --glow:      rgba(88,101,242,.35);
+      --text:      #e8eaf0;
+      --muted:     #7b7f91;
+      --success:   #57f287;
+      --danger:    #ed4245;
+      --radius:    14px;
+      --transition: .22s cubic-bezier(.4,0,.2,1);
+    }
+
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    body {
+      font-family: 'DM Sans', sans-serif;
+      background: var(--bg);
+      color: var(--text);
+      min-height: 100vh;
+      overflow-x: hidden;
+    }
+
+    /* ─── Background Mesh ─── */
+    body::before {
+      content: '';
+      position: fixed;
+      inset: 0;
+      background:
+        radial-gradient(ellipse 80% 60% at 10% 10%, rgba(88,101,242,.13) 0%, transparent 70%),
+        radial-gradient(ellipse 60% 50% at 90% 80%, rgba(235,69,158,.10) 0%, transparent 65%),
+        radial-gradient(ellipse 50% 40% at 50% 50%, rgba(88,101,242,.05) 0%, transparent 60%);
+      pointer-events: none;
+      z-index: 0;
+    }
+
+    /* ─── Scrollbar ─── */
+    ::-webkit-scrollbar { width: 6px; }
+    ::-webkit-scrollbar-track { background: var(--surface); }
+    ::-webkit-scrollbar-thumb { background: var(--border); border-radius: 99px; }
+
+    /* ─── Pages ─── */
+    .page { display: none; position: relative; z-index: 1; }
+    .page.active { display: block; }
+
+    /* ══════════════════════════════════════
+       LANDING PAGE
+    ══════════════════════════════════════ */
+    #landing {
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
+    }
+
+    /* Nav */
+    .nav {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 22px 48px;
+      border-bottom: 1px solid var(--border);
+      backdrop-filter: blur(12px);
+      background: rgba(10,11,16,.6);
+      position: sticky; top: 0; z-index: 100;
+    }
+    .nav-logo {
+      font-family: 'Syne', sans-serif;
+      font-weight: 800;
+      font-size: 1.5rem;
+      letter-spacing: -1px;
+      background: linear-gradient(135deg, #fff 30%, var(--accent));
+      -webkit-background-clip: text; -webkit-text-fill-color: transparent;
+    }
+    .nav-logo span { color: var(--accent); -webkit-text-fill-color: var(--accent); }
+    .nav-links { display: flex; gap: 32px; list-style: none; }
+    .nav-links a { color: var(--muted); text-decoration: none; font-size: .92rem; transition: color var(--transition); }
+    .nav-links a:hover { color: var(--text); }
+    .btn {
+      display: inline-flex; align-items: center; gap: 8px;
+      padding: 10px 22px;
+      border-radius: 99px;
+      font-family: 'DM Sans', sans-serif;
+      font-size: .9rem; font-weight: 500;
+      cursor: pointer; border: none;
+      transition: all var(--transition);
+      text-decoration: none;
+    }
+    .btn-primary {
+      background: var(--accent);
+      color: #fff;
+      box-shadow: 0 0 24px var(--glow);
+    }
+    .btn-primary:hover { background: #4752c4; box-shadow: 0 0 36px var(--glow); transform: translateY(-1px); }
+    .btn-ghost {
+      background: transparent;
+      border: 1px solid var(--border);
+      color: var(--text);
+    }
+    .btn-ghost:hover { border-color: var(--accent); color: var(--accent); }
+
+    /* Hero */
+    .hero {
+      flex: 1;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      text-align: center;
+      padding: 100px 24px 80px;
+    }
+    .hero-badge {
+      display: inline-flex; align-items: center; gap: 8px;
+      background: rgba(88,101,242,.12);
+      border: 1px solid rgba(88,101,242,.3);
+      color: #a5b4fc;
+      border-radius: 99px;
+      padding: 6px 16px;
+      font-size: .82rem; font-weight: 500;
+      margin-bottom: 32px;
+      animation: fadeDown .6s both;
+    }
+    .hero-badge .dot { width: 7px; height: 7px; border-radius: 50%; background: var(--success); box-shadow: 0 0 8px var(--success); animation: pulse 2s infinite; }
+    @keyframes pulse { 0%,100%{opacity:1}50%{opacity:.4} }
+    @keyframes fadeDown { from{opacity:0;transform:translateY(-16px)} to{opacity:1;transform:none} }
+    @keyframes fadeUp { from{opacity:0;transform:translateY(20px)} to{opacity:1;transform:none} }
+
+    .hero h1 {
+      font-family: 'Syne', sans-serif;
+      font-size: clamp(2.8rem, 7vw, 5.5rem);
+      font-weight: 800;
+      line-height: 1.05;
+      letter-spacing: -2px;
+      max-width: 820px;
+      animation: fadeUp .7s .1s both;
+    }
+    .hero h1 .gradient {
+      background: linear-gradient(135deg, var(--accent) 0%, var(--accent2) 100%);
+      -webkit-background-clip: text; -webkit-text-fill-color: transparent;
+    }
+    .hero p {
+      margin-top: 24px;
+      color: var(--muted);
+      font-size: 1.15rem;
+      max-width: 520px;
+      line-height: 1.7;
+      animation: fadeUp .7s .2s both;
+    }
+    .hero-cta {
+      margin-top: 44px;
+      display: flex; gap: 14px; flex-wrap: wrap; justify-content: center;
+      animation: fadeUp .7s .3s both;
+    }
+    .btn-discord {
+      background: var(--accent);
+      color: #fff;
+      padding: 14px 30px;
+      font-size: 1rem;
+      border-radius: 12px;
+      box-shadow: 0 4px 40px var(--glow);
+    }
+    .btn-discord:hover { transform: translateY(-2px); box-shadow: 0 8px 50px var(--glow); background: #4752c4; }
+    .btn-discord svg { width: 22px; height: 22px; }
+
+    /* Features */
+    .features {
+      padding: 80px 48px;
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
+      gap: 20px;
+      max-width: 1100px;
+      margin: 0 auto;
+      width: 100%;
+    }
+    .feat-card {
+      background: var(--card);
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      padding: 32px 28px;
+      transition: border-color var(--transition), transform var(--transition);
+    }
+    .feat-card:hover { border-color: var(--accent); transform: translateY(-4px); }
+    .feat-icon {
+      width: 48px; height: 48px;
+      border-radius: 12px;
+      background: rgba(88,101,242,.15);
+      display: flex; align-items: center; justify-content: center;
+      font-size: 1.4rem;
+      margin-bottom: 18px;
+    }
+    .feat-card h3 { font-family: 'Syne', sans-serif; font-size: 1.05rem; margin-bottom: 8px; }
+    .feat-card p { color: var(--muted); font-size: .9rem; line-height: 1.6; }
+
+    /* Stats strip */
+    .stats {
+      border-top: 1px solid var(--border);
+      border-bottom: 1px solid var(--border);
+      padding: 40px 48px;
+      display: flex; justify-content: center; gap: 80px; flex-wrap: wrap;
+      background: var(--surface);
+    }
+    .stat { text-align: center; }
+    .stat-num { font-family: 'Syne', sans-serif; font-size: 2.2rem; font-weight: 800; background: linear-gradient(135deg, var(--accent), var(--accent2)); -webkit-background-clip: text; -webkit-text-fill-color: transparent; }
+    .stat-label { color: var(--muted); font-size: .85rem; margin-top: 4px; }
+
+    /* Footer */
+    .footer { padding: 32px 48px; border-top: 1px solid var(--border); text-align: center; color: var(--muted); font-size: .85rem; }
+
+    /* ══════════════════════════════════════
+       CALLBACK / LOADING
+    ══════════════════════════════════════ */
+    #callback {
+      min-height: 100vh;
+      display: flex; align-items: center; justify-content: center;
+      flex-direction: column; gap: 20px;
+    }
+    .spinner {
+      width: 52px; height: 52px;
+      border: 3px solid var(--border);
+      border-top-color: var(--accent);
+      border-radius: 50%;
+      animation: spin 1s linear infinite;
+    }
+    @keyframes spin { to { transform: rotate(360deg); } }
+    #callback p { color: var(--muted); font-size: 1rem; }
+
+    /* ══════════════════════════════════════
+       DASHBOARD
+    ══════════════════════════════════════ */
+    #dashboard { min-height: 100vh; display: flex; flex-direction: column; }
+
+    .dash-nav {
+      display: flex; align-items: center; justify-content: space-between;
+      padding: 16px 32px;
+      background: var(--surface);
+      border-bottom: 1px solid var(--border);
+      position: sticky; top: 0; z-index: 100;
+    }
+    .dash-nav .nav-logo { font-size: 1.25rem; }
+    .user-pill {
+      display: flex; align-items: center; gap: 10px;
+      background: var(--card);
+      border: 1px solid var(--border);
+      border-radius: 99px;
+      padding: 6px 14px 6px 6px;
+    }
+    .user-avatar {
+      width: 30px; height: 30px; border-radius: 50%;
+      background: linear-gradient(135deg, var(--accent), var(--accent2));
+      display: flex; align-items: center; justify-content: center;
+      font-size: .85rem; font-weight: 700; color: #fff;
+      overflow: hidden;
+    }
+    .user-avatar img { width: 100%; height: 100%; object-fit: cover; }
+    .user-name { font-size: .88rem; font-weight: 500; }
+    .btn-logout {
+      background: transparent; border: none; color: var(--muted);
+      cursor: pointer; font-size: .8rem; padding: 0 8px;
+      transition: color var(--transition);
+    }
+    .btn-logout:hover { color: var(--danger); }
+
+    .dash-body {
+      display: flex; flex: 1;
+    }
+
+    /* Sidebar */
+    .sidebar {
+      width: 240px; min-width: 240px;
+      background: var(--surface);
+      border-right: 1px solid var(--border);
+      padding: 24px 16px;
+      display: flex; flex-direction: column; gap: 4px;
+    }
+    .sidebar-label {
+      font-size: .72rem; font-weight: 600; letter-spacing: 1px;
+      color: var(--muted); text-transform: uppercase;
+      padding: 0 12px; margin: 16px 0 8px;
+    }
+    .sidebar-label:first-child { margin-top: 0; }
+    .sidebar-item {
+      display: flex; align-items: center; gap: 10px;
+      padding: 10px 12px; border-radius: 10px;
+      color: var(--muted); font-size: .9rem;
+      cursor: pointer; transition: all var(--transition);
+      border: 1px solid transparent;
+    }
+    .sidebar-item:hover { background: var(--card); color: var(--text); }
+    .sidebar-item.active { background: rgba(88,101,242,.15); color: var(--accent); border-color: rgba(88,101,242,.25); }
+    .sidebar-icon { font-size: 1rem; width: 20px; text-align: center; }
+
+    /* Server selector */
+    .server-selector {
+      background: var(--card);
+      border: 1px solid var(--border);
+      border-radius: 10px;
+      padding: 12px;
+      margin-bottom: 20px;
+    }
+    .server-selector label { font-size: .75rem; color: var(--muted); text-transform: uppercase; letter-spacing: .5px; display: block; margin-bottom: 8px; }
+    .server-dropdown {
+      width: 100%;
+      background: var(--surface);
+      border: 1px solid var(--border);
+      color: var(--text);
+      border-radius: 8px;
+      padding: 8px 10px;
+      font-family: 'DM Sans', sans-serif;
+      font-size: .88rem;
+      cursor: pointer;
+      outline: none;
+      transition: border-color var(--transition);
+    }
+    .server-dropdown:focus { border-color: var(--accent); }
+
+    /* Main content */
+    .dash-main {
+      flex: 1;
+      padding: 36px 40px;
+      overflow-y: auto;
+    }
+
+    .page-header { margin-bottom: 32px; }
+    .page-header h2 { font-family: 'Syne', sans-serif; font-size: 1.6rem; font-weight: 700; }
+    .page-header p { color: var(--muted); font-size: .9rem; margin-top: 6px; }
+
+    /* Config sections */
+    .config-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 20px;
+    }
+    @media (max-width: 900px) { .config-grid { grid-template-columns: 1fr; } }
+
+    .config-card {
+      background: var(--card);
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      padding: 28px;
+    }
+    .config-card h3 {
+      font-family: 'Syne', sans-serif;
+      font-size: 1rem; font-weight: 700;
+      margin-bottom: 6px;
+      display: flex; align-items: center; gap: 8px;
+    }
+    .config-card > p { color: var(--muted); font-size: .85rem; margin-bottom: 20px; }
+
+    .form-group { margin-bottom: 18px; }
+    .form-label {
+      display: block; font-size: .82rem; font-weight: 500;
+      margin-bottom: 8px; color: var(--muted); text-transform: uppercase; letter-spacing: .5px;
+    }
+    .form-control {
+      width: 100%;
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: 10px;
+      padding: 10px 14px;
+      color: var(--text);
+      font-family: 'DM Sans', sans-serif;
+      font-size: .9rem;
+      outline: none;
+      transition: border-color var(--transition), box-shadow var(--transition);
+    }
+    .form-control:focus { border-color: var(--accent); box-shadow: 0 0 0 3px rgba(88,101,242,.15); }
+    textarea.form-control { resize: vertical; min-height: 100px; line-height: 1.6; }
+    select.form-control { cursor: pointer; }
+
+    /* Channel list */
+    .channel-list {
+      display: flex; flex-direction: column; gap: 8px;
+      max-height: 240px; overflow-y: auto;
+      margin-bottom: 18px;
+    }
+    .channel-item {
+      display: flex; align-items: center; gap: 10px;
+      padding: 10px 14px; border-radius: 10px;
+      background: var(--surface);
+      border: 2px solid transparent;
+      cursor: pointer;
+      transition: all var(--transition);
+      font-size: .9rem;
+    }
+    .channel-item:hover { border-color: var(--border); }
+    .channel-item.selected { border-color: var(--accent); background: rgba(88,101,242,.1); }
+    .channel-item .ch-hash { color: var(--muted); font-size: 1rem; }
+    .channel-item .ch-name { flex: 1; }
+    .channel-item .ch-check {
+      width: 18px; height: 18px; border-radius: 50%;
+      background: var(--accent); display: none; align-items: center; justify-content: center;
+      font-size: .65rem; color: #fff;
+    }
+    .channel-item.selected .ch-check { display: flex; }
+
+    /* Toggle */
+    .toggle-row {
+      display: flex; align-items: center; justify-content: space-between;
+      padding: 12px 0; border-bottom: 1px solid var(--border);
+    }
+    .toggle-row:last-child { border-bottom: none; padding-bottom: 0; }
+    .toggle-info h4 { font-size: .9rem; font-weight: 500; }
+    .toggle-info p { font-size: .8rem; color: var(--muted); margin-top: 2px; }
+    .toggle {
+      position: relative; width: 44px; height: 24px;
+      flex-shrink: 0;
+    }
+    .toggle input { opacity: 0; width: 0; height: 0; }
+    .toggle-slider {
+      position: absolute; inset: 0;
+      background: var(--border);
+      border-radius: 99px;
+      cursor: pointer;
+      transition: background var(--transition);
+    }
+    .toggle-slider::before {
+      content: ''; position: absolute;
+      width: 18px; height: 18px; border-radius: 50%;
+      background: #fff; top: 3px; left: 3px;
+      transition: transform var(--transition);
+    }
+    .toggle input:checked + .toggle-slider { background: var(--accent); }
+    .toggle input:checked + .toggle-slider::before { transform: translateX(20px); }
+
+    /* Preview card */
+    .preview-card {
+      grid-column: 1 / -1;
+      background: var(--card);
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      padding: 28px;
+    }
+    .preview-card h3 { font-family: 'Syne', sans-serif; font-size: 1rem; margin-bottom: 20px; display: flex; align-items: center; gap: 8px; }
+
+    /* Discord message mock */
+    .discord-mock {
+      background: #313338;
+      border-radius: 12px;
+      padding: 20px;
+      font-family: 'DM Sans', sans-serif;
+    }
+    .msg-header { display: flex; align-items: center; gap: 12px; margin-bottom: 2px; }
+    .msg-avatar {
+      width: 40px; height: 40px; border-radius: 50%;
+      background: linear-gradient(135deg, var(--accent), var(--accent2));
+      display: flex; align-items: center; justify-content: center;
+      font-size: 1rem; font-weight: 700; color: #fff; flex-shrink: 0;
+    }
+    .msg-author { font-weight: 600; color: #fff; font-size: .95rem; }
+    .msg-bot-badge {
+      display: inline-flex; align-items: center;
+      background: var(--accent); color: #fff;
+      font-size: .65rem; font-weight: 700;
+      padding: 2px 6px; border-radius: 4px; margin-left: 6px;
+      letter-spacing: .5px;
+    }
+    .msg-time { color: #72767d; font-size: .78rem; margin-left: 8px; }
+    .msg-body { padding-left: 52px; }
+    .msg-embed {
+      margin-top: 8px;
+      border-left: 4px solid var(--accent);
+      background: #2b2d31;
+      border-radius: 0 8px 8px 0;
+      padding: 16px;
+    }
+    .embed-title { font-weight: 700; color: #fff; margin-bottom: 8px; font-size: .95rem; }
+    .embed-desc { color: #dbdee1; font-size: .9rem; line-height: 1.6; }
+    .embed-footer { color: #72767d; font-size: .78rem; margin-top: 12px; }
+
+    /* Save bar */
+    .save-bar {
+      position: fixed; bottom: 28px; left: 50%; transform: translateX(-50%);
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: 14px;
+      padding: 14px 24px;
+      display: flex; align-items: center; gap: 14px;
+      box-shadow: 0 8px 40px rgba(0,0,0,.5);
+      opacity: 0; pointer-events: none;
+      transition: opacity .3s, transform .3s;
+      transform: translateX(-50%) translateY(10px);
+      z-index: 200;
+    }
+    .save-bar.visible { opacity: 1; pointer-events: all; transform: translateX(-50%) translateY(0); }
+    .save-bar p { font-size: .88rem; color: var(--muted); }
+    .btn-save {
+      background: var(--success); color: #000;
+      font-weight: 600; padding: 9px 22px; border-radius: 9px;
+      border: none; cursor: pointer; font-family: 'DM Sans', sans-serif;
+      font-size: .88rem; transition: opacity var(--transition);
+    }
+    .btn-save:hover { opacity: .85; }
+    .btn-discard {
+      background: transparent; border: none; color: var(--muted);
+      cursor: pointer; font-family: 'DM Sans', sans-serif; font-size: .88rem;
+      transition: color var(--transition);
+    }
+    .btn-discard:hover { color: var(--danger); }
+
+    /* Toast */
+    .toast {
+      position: fixed; bottom: 100px; right: 32px;
+      background: var(--success); color: #000;
+      border-radius: 10px; padding: 12px 20px;
+      font-weight: 600; font-size: .9rem;
+      opacity: 0; transform: translateX(20px);
+      transition: all .3s; z-index: 300;
+      pointer-events: none;
+    }
+    .toast.show { opacity: 1; transform: translateX(0); }
+
+    /* Color vars */
+    .color-row {
+      display: flex; align-items: center; gap: 12px;
+    }
+    .color-picker {
+      width: 40px; height: 36px; border-radius: 8px;
+      border: 1px solid var(--border); cursor: pointer;
+      background: none; padding: 2px;
+    }
+
+    /* Badges section */
+    .badge-list { display: flex; flex-wrap: wrap; gap: 8px; margin-top: 10px; }
+    .var-badge {
+      background: rgba(88,101,242,.15); border: 1px solid rgba(88,101,242,.3);
+      color: #a5b4fc; border-radius: 6px; padding: 4px 10px;
+      font-size: .78rem; font-family: monospace; cursor: pointer;
+      transition: background var(--transition);
+    }
+    .var-badge:hover { background: rgba(88,101,242,.3); }
+
+    /* Responsive */
+    @media (max-width: 768px) {
+      .nav { padding: 16px 20px; }
+      .nav-links { display: none; }
+      .hero { padding: 60px 20px; }
+      .features { padding: 40px 20px; }
+      .stats { gap: 40px; }
+      .sidebar { display: none; }
+      .dash-main { padding: 24px 20px; }
+    }
+  </style>
 </head>
 <body>
-    <div class="container">
-        <h1>Panel de Bienvenida</h1>
-        <p>Configura el mensaje de tu bot</p>
-        <input type="text" id="canal" placeholder="ID del Canal de Bienvenida">
-        <textarea id="mensaje" placeholder="Ej: ¡Bienvenido {user} al servidor!"></textarea>
-        <br>
-        <button onclick="guardar()">Guardar Configuración</button>
-    </div>
 
-    <script>
-        function guardar() {
-            alert("¡Configuración enviada! (Aquí conectaremos con tu bot luego)");
-        }
-    </script>
+<!-- ══════════════════ LANDING PAGE ══════════════════ -->
+<div id="landing" class="page active">
+  <nav class="nav">
+    <div class="nav-logo">Zora<span>.</span></div>
+    <ul class="nav-links">
+      <li><a href="#">Características</a></li>
+      <li><a href="#">Documentación</a></li>
+      <li><a href="#">Soporte</a></li>
+    </ul>
+    <button class="btn btn-primary" onclick="login()">
+      <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor" style="width:16px"><path d="M20.317 4.37a19.791 19.791 0 0 0-4.885-1.515.074.074 0 0 0-.079.037c-.21.375-.444.864-.608 1.25a18.27 18.27 0 0 0-5.487 0 12.64 12.64 0 0 0-.617-1.25.077.077 0 0 0-.079-.037A19.736 19.736 0 0 0 3.677 4.37a.07.07 0 0 0-.032.027C.533 9.046-.32 13.58.099 18.057.1 18.08.11 18.1.13 18.115a19.9 19.9 0 0 0 5.993 3.03.078.078 0 0 0 .084-.028c.462-.63.874-1.295 1.226-1.994a.076.076 0 0 0-.041-.106 13.107 13.107 0 0 1-1.872-.892.077.077 0 0 1-.008-.128 10.2 10.2 0 0 0 .372-.292.074.074 0 0 1 .077-.01c3.928 1.793 8.18 1.793 12.062 0a.074.074 0 0 1 .078.01c.12.098.246.198.373.292a.077.077 0 0 1-.006.127 12.299 12.299 0 0 1-1.873.892.077.077 0 0 0-.041.107c.36.698.772 1.362 1.225 1.993a.076.076 0 0 0 .084.028 19.839 19.839 0 0 0 6.002-3.03.077.077 0 0 0 .032-.054c.5-5.177-.838-9.674-3.549-13.66a.061.061 0 0 0-.031-.03z"/></svg>
+      Iniciar sesión con Discord
+    </button>
+  </nav>
+
+  <section class="hero">
+    <div class="hero-badge">
+      <span class="dot"></span>
+      Bienvenido a Zora Bot
+    </div>
+    <h1>El bot de bienvenidas<br/>más <span class="gradient">personalizable</span><br/>para tu servidor</h1>
+    <p>Configura mensajes de bienvenida únicos, elige el canal perfecto y personaliza cada detalle desde tu dashboard.</p>
+    <div class="hero-cta">
+      <button class="btn btn-discord" onclick="login()">
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor"><path d="M20.317 4.37a19.791 19.791 0 0 0-4.885-1.515.074.074 0 0 0-.079.037c-.21.375-.444.864-.608 1.25a18.27 18.27 0 0 0-5.487 0 12.64 12.64 0 0 0-.617-1.25.077.077 0 0 0-.079-.037A19.736 19.736 0 0 0 3.677 4.37a.07.07 0 0 0-.032.027C.533 9.046-.32 13.58.099 18.057.1 18.08.11 18.1.13 18.115a19.9 19.9 0 0 0 5.993 3.03.078.078 0 0 0 .084-.028c.462-.63.874-1.295 1.226-1.994a.076.076 0 0 0-.041-.106 13.107 13.107 0 0 1-1.872-.892.077.077 0 0 1-.008-.128 10.2 10.2 0 0 0 .372-.292.074.074 0 0 1 .077-.01c3.928 1.793 8.18 1.793 12.062 0a.074.074 0 0 1 .078.01c.12.098.246.198.373.292a.077.077 0 0 1-.006.127 12.299 12.299 0 0 1-1.873.892.077.077 0 0 0-.041.107c.36.698.772 1.362 1.225 1.993a.076.076 0 0 0 .084.028 19.839 19.839 0 0 0 6.002-3.03.077.077 0 0 0 .032-.054c.5-5.177-.838-9.674-3.549-13.66a.061.061 0 0 0-.031-.03z"/></svg>
+        Añadir al servidor
+      </button>
+      <a href="#features" class="btn btn-ghost">Ver características →</a>
+    </div>
+  </section>
+
+  <div class="stats">
+    <div class="stat"><div class="stat-num">10K+</div><div class="stat-label">Servidores activos</div></div>
+    <div class="stat"><div class="stat-num">500K+</div><div class="stat-label">Bienvenidas enviadas</div></div>
+    <div class="stat"><div class="stat-num">99.9%</div><div class="stat-label">Uptime garantizado</div></div>
+  </div>
+
+  <section class="features" id="features">
+    <div class="feat-card">
+      <div class="feat-icon">👋</div>
+      <h3>Mensajes personalizados</h3>
+      <p>Crea mensajes únicos con variables dinámicas como el nombre del usuario, servidor y más.</p>
+    </div>
+    <div class="feat-card">
+      <div class="feat-icon">📌</div>
+      <h3>Canal configurable</h3>
+      <p>Elige exactamente en qué canal quieres que Zora envíe los mensajes de bienvenida.</p>
+    </div>
+    <div class="feat-card">
+      <div class="feat-icon">🎨</div>
+      <h3>Embeds con estilo</h3>
+      <p>Personaliza el color del embed, título, descripción y footer para que encaje con tu servidor.</p>
+    </div>
+    <div class="feat-card">
+      <div class="feat-icon">⚡</div>
+      <h3>Dashboard en tiempo real</h3>
+      <p>Previsualiza exactamente cómo se verá el mensaje antes de guardar los cambios.</p>
+    </div>
+  </section>
+
+  <footer class="footer">© 2025 Zora Bot · Hecho con ❤️ · <a href="#" style="color:var(--accent);text-decoration:none">Términos</a> · <a href="#" style="color:var(--accent);text-decoration:none">Privacidad</a></footer>
+</div>
+
+<!-- ══════════════════ CALLBACK / LOADING ══════════════════ -->
+<div id="callback" class="page">
+  <div class="spinner"></div>
+  <p>Autenticando con Discord...</p>
+</div>
+
+<!-- ══════════════════ DASHBOARD ══════════════════ -->
+<div id="dashboard" class="page">
+  <nav class="dash-nav">
+    <div class="nav-logo">Zora<span style="color:var(--accent)">.</span></div>
+    <div style="display:flex;align-items:center;gap:12px">
+      <div class="user-pill">
+        <div class="user-avatar" id="avatarEl"></div>
+        <span class="user-name" id="userNameEl">Usuario</span>
+        <button class="btn-logout" onclick="logout()">✕</button>
+      </div>
+    </div>
+  </nav>
+
+  <div class="dash-body">
+    <!-- Sidebar -->
+    <aside class="sidebar">
+      <div class="server-selector">
+        <label>Servidor activo</label>
+        <select class="server-dropdown" id="serverSelect" onchange="loadServer()">
+          <option value="">Seleccionar servidor...</option>
+        </select>
+      </div>
+
+      <div class="sidebar-label">Configuración</div>
+      <div class="sidebar-item active" onclick="showSection('welcome')">
+        <span class="sidebar-icon">👋</span> Bienvenidas
+      </div>
+      <div class="sidebar-item" onclick="showSection('goodbye')">
+        <span class="sidebar-icon">🚪</span> Despedidas
+      </div>
+
+      <div class="sidebar-label">General</div>
+      <div class="sidebar-item" onclick="showSection('logs')">
+        <span class="sidebar-icon">📋</span> Logs
+      </div>
+      <div class="sidebar-item" onclick="showSection('overview')">
+        <span class="sidebar-icon">📊</span> Estadísticas
+      </div>
+    </aside>
+
+    <!-- Main -->
+    <main class="dash-main" id="dashMain">
+      <!-- Welcome section -->
+      <div id="sec-welcome">
+        <div class="page-header">
+          <h2>👋 Bienvenidas</h2>
+          <p>Configura el canal y el mensaje de bienvenida para tu servidor.</p>
+        </div>
+
+        <div class="config-grid">
+          <!-- Canal de bienvenida -->
+          <div class="config-card">
+            <h3>📌 Canal de bienvenida</h3>
+            <p>Selecciona el canal donde Zora enviará el mensaje cuando alguien se una.</p>
+            <div class="channel-list" id="channelList">
+              <!-- Generado dinámicamente -->
+            </div>
+            <div style="color:var(--muted);font-size:.8rem">
+              <span id="selectedChannelInfo">Ningún canal seleccionado</span>
+            </div>
+          </div>
+
+          <!-- Opciones del mensaje -->
+          <div class="config-card">
+            <h3>⚙️ Opciones</h3>
+            <p>Activa o desactiva funcionalidades del mensaje de bienvenida.</p>
+            <div class="toggle-row">
+              <div class="toggle-info">
+                <h4>Mencionar al usuario</h4>
+                <p>El bot mencionará al nuevo miembro</p>
+              </div>
+              <label class="toggle">
+                <input type="checkbox" id="optMention" checked onchange="updatePreview()">
+                <span class="toggle-slider"></span>
+              </label>
+            </div>
+            <div class="toggle-row">
+              <div class="toggle-info">
+                <h4>Mostrar embed</h4>
+                <p>Enviar el mensaje como embed de Discord</p>
+              </div>
+              <label class="toggle">
+                <input type="checkbox" id="optEmbed" checked onchange="updatePreview()">
+                <span class="toggle-slider"></span>
+              </label>
+            </div>
+            <div class="toggle-row">
+              <div class="toggle-info">
+                <h4>Mostrar avatar</h4>
+                <p>Incluir la foto del nuevo miembro</p>
+              </div>
+              <label class="toggle">
+                <input type="checkbox" id="optAvatar" checked onchange="updatePreview()">
+                <span class="toggle-slider"></span>
+              </label>
+            </div>
+            <div class="toggle-row">
+              <div class="toggle-info">
+                <h4>Mostrar número de miembro</h4>
+                <p>Ej: "Eres el miembro #243"</p>
+              </div>
+              <label class="toggle">
+                <input type="checkbox" id="optMemberCount" checked onchange="updatePreview()">
+                <span class="toggle-slider"></span>
+              </label>
+            </div>
+          </div>
+
+          <!-- Personalización del mensaje -->
+          <div class="config-card">
+            <h3>✏️ Mensaje</h3>
+            <p>Personaliza el contenido del mensaje de bienvenida.</p>
+
+            <div class="form-group">
+              <label class="form-label">Título del embed</label>
+              <input class="form-control" id="embedTitle" type="text" value="¡Bienvenido/a al servidor! 🎉" oninput="updatePreview();markDirty()" />
+            </div>
+            <div class="form-group">
+              <label class="form-label">Descripción</label>
+              <textarea class="form-control" id="embedDesc" oninput="updatePreview();markDirty()">¡Hola {user}! 👋 Nos alegra tenerte con nosotros en **{server}**. Ya somos {count} miembros. ¡Esperamos que la pases genial!</textarea>
+            </div>
+            <div class="form-group">
+              <label class="form-label">Footer</label>
+              <input class="form-control" id="embedFooter" type="text" value="Zora Bot · {server}" oninput="updatePreview();markDirty()" />
+            </div>
+            <div class="form-group">
+              <label class="form-label">Color del embed</label>
+              <div class="color-row">
+                <input type="color" class="color-picker" id="embedColor" value="#5865F2" oninput="updatePreview();markDirty()" />
+                <span style="font-size:.85rem;color:var(--muted)" id="colorHex">#5865F2</span>
+              </div>
+            </div>
+            <div class="form-group">
+              <label class="form-label">Variables disponibles</label>
+              <div class="badge-list">
+                <span class="var-badge" onclick="insertVar('{user}')">&#123;user&#125;</span>
+                <span class="var-badge" onclick="insertVar('{server}')">&#123;server&#125;</span>
+                <span class="var-badge" onclick="insertVar('{count}')">&#123;count&#125;</span>
+                <span class="var-badge" onclick="insertVar('{username}')">&#123;username&#125;</span>
+                <span class="var-badge" onclick="insertVar('{date}')">&#123;date&#125;</span>
+              </div>
+            </div>
+          </div>
+
+          <!-- Mensaje de texto (fuera del embed) -->
+          <div class="config-card">
+            <h3>💬 Mensaje de texto</h3>
+            <p>Mensaje que aparece encima del embed (fuera del embed).</p>
+            <div class="form-group">
+              <label class="form-label">Texto del mensaje</label>
+              <textarea class="form-control" id="textMsg" oninput="updatePreview();markDirty()" style="min-height:80px">👋 ¡Bienvenido/a {user}!</textarea>
+            </div>
+          </div>
+
+          <!-- Preview -->
+          <div class="preview-card">
+            <h3>👁️ Vista previa en tiempo real</h3>
+            <div class="discord-mock">
+              <div class="msg-header">
+                <div class="msg-avatar">Z</div>
+                <div>
+                  <span class="msg-author">Zora</span>
+                  <span class="msg-bot-badge">BOT</span>
+                  <span class="msg-time">Hoy a las 12:00</span>
+                </div>
+              </div>
+              <div class="msg-body">
+                <div id="previewText" style="color:#dbdee1;margin-bottom:8px;font-size:.9rem"></div>
+                <div class="msg-embed" id="previewEmbed">
+                  <div class="embed-title" id="previewTitle"></div>
+                  <div class="embed-desc" id="previewDesc"></div>
+                  <div class="embed-footer" id="previewFooter"></div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Placeholder sections -->
+      <div id="sec-goodbye" style="display:none">
+        <div class="page-header">
+          <h2>🚪 Despedidas</h2>
+          <p>Configura el mensaje cuando alguien abandona el servidor. <em style="color:var(--muted)">(Próximamente)</em></p>
+        </div>
+        <div class="config-card" style="max-width:500px;text-align:center;padding:60px">
+          <div style="font-size:3rem;margin-bottom:16px">🚧</div>
+          <h3 style="font-family:Syne;margin-bottom:8px">En construcción</h3>
+          <p style="color:var(--muted)">Esta sección estará disponible pronto.</p>
+        </div>
+      </div>
+
+      <div id="sec-logs" style="display:none">
+        <div class="page-header">
+          <h2>📋 Logs</h2>
+          <p>Registro de actividad del bot. <em style="color:var(--muted)">(Próximamente)</em></p>
+        </div>
+        <div class="config-card" style="max-width:500px;text-align:center;padding:60px">
+          <div style="font-size:3rem;margin-bottom:16px">🚧</div>
+          <h3 style="font-family:Syne;margin-bottom:8px">En construcción</h3>
+          <p style="color:var(--muted)">Esta sección estará disponible pronto.</p>
+        </div>
+      </div>
+
+      <div id="sec-overview" style="display:none">
+        <div class="page-header">
+          <h2>📊 Estadísticas</h2>
+          <p>Vista general del servidor. <em style="color:var(--muted)">(Próximamente)</em></p>
+        </div>
+        <div class="config-card" style="max-width:500px;text-align:center;padding:60px">
+          <div style="font-size:3rem;margin-bottom:16px">🚧</div>
+          <h3 style="font-family:Syne;margin-bottom:8px">En construcción</h3>
+          <p style="color:var(--muted)">Esta sección estará disponible pronto.</p>
+        </div>
+      </div>
+    </main>
+  </div>
+
+  <!-- Save bar -->
+  <div class="save-bar" id="saveBar">
+    <p>Tienes cambios sin guardar</p>
+    <button class="btn-discard" onclick="discardChanges()">Descartar</button>
+    <button class="btn-save" onclick="saveChanges()">💾 Guardar cambios</button>
+  </div>
+</div>
+
+<!-- Toast -->
+<div class="toast" id="toast">✅ Cambios guardados correctamente</div>
+
+<script>
+  /* ─── State ─── */
+  const STATE = {
+    user: null,
+    guilds: [],
+    selectedGuild: null,
+    selectedChannel: null,
+    dirty: false,
+  };
+
+  /* ─── MOCK Data (replace with real Discord OAuth2) ─── */
+  const MOCK_USER = {
+    id: '123456789',
+    username: 'Usuario#0001',
+    avatar: null,
+    tag: 'Usuario'
+  };
+
+  const MOCK_GUILDS = [
+    { id: '111', name: 'Mi Servidor Épico', icon: null },
+    { id: '222', name: 'Comunidad Gaming', icon: null },
+    { id: '333', name: 'Dev Hub', icon: null },
+  ];
+
+  const MOCK_CHANNELS = {
+    '111': [
+      { id: 'c1', name: 'general' },
+      { id: 'c2', name: 'bienvenidas' },
+      { id: 'c3', name: 'anuncios' },
+      { id: 'c4', name: 'chat-libre' },
+      { id: 'c5', name: 'presentaciones' },
+    ],
+    '222': [
+      { id: 'c6', name: 'general' },
+      { id: 'c7', name: 'bienvenidos' },
+      { id: 'c8', name: 'offtopic' },
+    ],
+    '333': [
+      { id: 'c9', name: 'general' },
+      { id: 'c10', name: 'welcome' },
+      { id: 'c11', name: 'proyectos' },
+    ],
+  };
+
+  /* ─── OAuth2 ─── */
+  // ⚠️ IMPORTANTE: Reemplaza estos valores con los tuyos de Discord Developer Portal
+  const CLIENT_ID = 'TU_CLIENT_ID_AQUI';
+  const REDIRECT_URI = encodeURIComponent('https://behance02.github.io/dashboards-bot/');
+  const SCOPES = 'identify guilds';
+
+  function login() {
+    // En producción real, redirige a Discord OAuth2
+    // const url = `https://discord.com/api/oauth2/authorize?client_id=${CLIENT_ID}&redirect_uri=${REDIRECT_URI}&response_type=code&scope=${encodeURIComponent(SCOPES)}`;
+    // window.location.href = url;
+
+    // DEMO: Simula login
+    showPage('callback');
+    setTimeout(() => {
+      STATE.user = MOCK_USER;
+      STATE.guilds = MOCK_GUILDS;
+      initDashboard();
+    }, 1800);
+  }
+
+  function logout() {
+    STATE.user = null;
+    STATE.guilds = [];
+    STATE.selectedGuild = null;
+    STATE.selectedChannel = null;
+    showPage('landing');
+  }
+
+  /* ─── Pages ─── */
+  function showPage(id) {
+    document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
+    document.getElementById(id).classList.add('active');
+  }
+
+  /* ─── Dashboard init ─── */
+  function initDashboard() {
+    showPage('dashboard');
+
+    // User info
+    const u = STATE.user;
+    const avatarEl = document.getElementById('avatarEl');
+    const userNameEl = document.getElementById('userNameEl');
+    userNameEl.textContent = u.username;
+    if (u.avatar) {
+      avatarEl.innerHTML = `<img src="https://cdn.discordapp.com/avatars/${u.id}/${u.avatar}.png" />`;
+    } else {
+      avatarEl.textContent = u.username[0].toUpperCase();
+    }
+
+    // Guilds
+    const sel = document.getElementById('serverSelect');
+    sel.innerHTML = '<option value="">Seleccionar servidor...</option>';
+    STATE.guilds.forEach(g => {
+      const opt = document.createElement('option');
+      opt.value = g.id;
+      opt.textContent = g.name;
+      sel.appendChild(opt);
+    });
+
+    updatePreview();
+  }
+
+  function loadServer() {
+    const id = document.getElementById('serverSelect').value;
+    if (!id) return;
+    STATE.selectedGuild = id;
+    STATE.selectedChannel = null;
+    renderChannels(MOCK_CHANNELS[id] || []);
+    document.getElementById('selectedChannelInfo').textContent = 'Ningún canal seleccionado';
+    updatePreview();
+  }
+
+  /* ─── Channels ─── */
+  function renderChannels(channels) {
+    const list = document.getElementById('channelList');
+    list.innerHTML = '';
+    channels.forEach(ch => {
+      const div = document.createElement('div');
+      div.className = 'channel-item';
+      div.dataset.id = ch.id;
+      div.innerHTML = `
+        <span class="ch-hash">#</span>
+        <span class="ch-name">${ch.name}</span>
+        <span class="ch-check">✓</span>
+      `;
+      div.onclick = () => selectChannel(ch.id, ch.name, div);
+      list.appendChild(div);
+    });
+  }
+
+  function selectChannel(id, name, el) {
+    document.querySelectorAll('.channel-item').forEach(i => i.classList.remove('selected'));
+    el.classList.add('selected');
+    STATE.selectedChannel = id;
+    document.getElementById('selectedChannelInfo').textContent = `Canal seleccionado: #${name}`;
+    markDirty();
+  }
+
+  /* ─── Preview ─── */
+  function updatePreview() {
+    const title = document.getElementById('embedTitle')?.value || '';
+    const desc = document.getElementById('embedDesc')?.value || '';
+    const footer = document.getElementById('embedFooter')?.value || '';
+    const color = document.getElementById('embedColor')?.value || '#5865F2';
+    const text = document.getElementById('textMsg')?.value || '';
+    const showEmbed = document.getElementById('optEmbed')?.checked;
+    const mention = document.getElementById('optMention')?.checked;
+
+    document.getElementById('colorHex').textContent = color;
+    document.getElementById('previewEmbed').style.borderLeftColor = color;
+
+    const replace = s => s
+      .replace(/\{user\}/g, mention ? '<@UserEjemplo>' : 'UserEjemplo')
+      .replace(/\{server\}/g, 'Mi Servidor')
+      .replace(/\{count\}/g, '243')
+      .replace(/\{username\}/g, 'UserEjemplo')
+      .replace(/\{date\}/g, new Date().toLocaleDateString('es'));
+
+    document.getElementById('previewText').innerHTML = replace(text);
+    document.getElementById('previewTitle').textContent = replace(title);
+    document.getElementById('previewDesc').innerHTML = replace(desc).replace(/\*\*(.*?)\*\*/g, '<strong>$1</strong>');
+    document.getElementById('previewFooter').textContent = replace(footer);
+    document.getElementById('previewEmbed').style.display = showEmbed ? '' : 'none';
+  }
+
+  /* ─── Sidebar sections ─── */
+  function showSection(name) {
+    ['welcome','goodbye','logs','overview'].forEach(s => {
+      document.getElementById(`sec-${s}`).style.display = s === name ? '' : 'none';
+    });
+    document.querySelectorAll('.sidebar-item').forEach(i => i.classList.remove('active'));
+    event.currentTarget.classList.add('active');
+  }
+
+  /* ─── Dirty state ─── */
+  function markDirty() {
+    STATE.dirty = true;
+    document.getElementById('saveBar').classList.add('visible');
+  }
+
+  function discardChanges() {
+    STATE.dirty = false;
+    document.getElementById('saveBar').classList.remove('visible');
+  }
+
+  function saveChanges() {
+    // En producción: enviar a tu API backend
+    console.log('Guardando config:', {
+      guild: STATE.selectedGuild,
+      channel: STATE.selectedChannel,
+      embedTitle: document.getElementById('embedTitle').value,
+      embedDesc: document.getElementById('embedDesc').value,
+      embedFooter: document.getElementById('embedFooter').value,
+      embedColor: document.getElementById('embedColor').value,
+      textMsg: document.getElementById('textMsg').value,
+      optMention: document.getElementById('optMention').checked,
+      optEmbed: document.getElementById('optEmbed').checked,
+      optAvatar: document.getElementById('optAvatar').checked,
+      optMemberCount: document.getElementById('optMemberCount').checked,
+    });
+
+    STATE.dirty = false;
+    document.getElementById('saveBar').classList.remove('visible');
+    showToast('✅ Cambios guardados correctamente');
+  }
+
+  function showToast(msg) {
+    const t = document.getElementById('toast');
+    t.textContent = msg;
+    t.classList.add('show');
+    setTimeout(() => t.classList.remove('show'), 3000);
+  }
+
+  /* ─── Variable insert ─── */
+  function insertVar(v) {
+    const el = document.getElementById('embedDesc');
+    const start = el.selectionStart;
+    const end = el.selectionEnd;
+    el.value = el.value.slice(0, start) + v + el.value.slice(end);
+    el.selectionStart = el.selectionEnd = start + v.length;
+    el.focus();
+    updatePreview();
+    markDirty();
+  }
+
+  /* ─── Check for OAuth2 callback ─── */
+  (function checkCallback() {
+    const params = new URLSearchParams(window.location.search);
+    const code = params.get('code');
+    if (code) {
+      showPage('callback');
+      // En producción: intercambia `code` por un access_token en tu backend
+      // fetch('/api/callback?code=' + code).then(...)
+      setTimeout(() => {
+        // Simulamos usuario real después del OAuth
+        STATE.user = MOCK_USER;
+        STATE.guilds = MOCK_GUILDS;
+        window.history.replaceState({}, '', window.location.pathname);
+        initDashboard();
+      }, 2000);
+    }
+  })();
+
+  /* Init preview */
+  updatePreview();
+</script>
 </body>
 </html>
